@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurnPredict</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link href="https://cdn.syncfusion.com/ej2/material.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        integrity="sha384-tViUnnbYAV00FLIhSSt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js" type="text/javascript"></script>
+    <script src=" https://cdn.syncfusion.com/ej2/ej2-popups/dist/global/ej2-popups.min.js "
+        type="text/javascript"></script>
+    <link href="https://cdn.syncfusion.com/ej2/ej2-popups/styles/material.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/geodata/usaLow.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .container {
+            margin: 20px;
+            padding: 2% 0;
+        }
+
+        #container {
+            position: relative;
+            height: 100%;
+        }
+
+        .top-right-button-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* Syncfusion Grid header styles */
+        .e-grid .e-headercelldiv {
+            font-size: 18px !important;
+        }
+
+        /* Custom icon sizes for grid commands */
+        .e-chart-insert-column,
+        .e-chart-insert-pie {
+            font-size: 32px !important;
+        }
+
+        /* Domain template styles */
+        .domain-template {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
+
+        .domain-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+
+        .domain-title {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .domain-text {
+            font-weight: 200;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .listener-channel-icon {
+            width: 30%;
+            margin-bottom: 10px;
+            /* Adjusted for card layout */
+            color: #007bff;
+        }
+
+        .channel-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            /* Spacing between cards */
+        }
+
+        .channel-card:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            border-color: #007bff;
+        }
+
+        .channel-card-title {
+            font-weight: 600;
+            margin-top: 10px;
+            color: #333;
+        }
+
+        /* Metrics Modal styles */
+        .metrics-modal-body {
+            display: flex;
+            height: 100%;
+            /* Ensure content fills modal height */
+        }
+
+        .metrics-left-pane {
+            flex: 0 0 30%;
+            /* Take 30% width */
+            border-right: 1px solid #eee;
+            padding-right: 15px;
+            overflow-y: auto;
+            /* Allow scrolling if TreeView is too long */
+        }
+
+        .metrics-right-pane {
+            flex: 1;
+            /* Take remaining width */
+            padding-left: 15px;
+            overflow-y: auto;
+        }
+
+        .conversion-option {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .conversion-option h6 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .conversion-option input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+            /* Make radio button slightly larger */
+        }
+    </style>
+</head>
+
+<body>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#listenersModal"
+        id="listenersButton" style="display: none;"></button>
+
+    <div class="modal fade" id="listenersModal" tabindex="-1" aria-labelledby="listenersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="listenersModalLabel">
+                        Configure Listeners for <span id="listenerEntityName"></span>
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: scroll;height: 457px;">
+                    <p class="text-center text-muted" id="listenersLoading">Loading listener details...</p>
+                    <p class="text-center text-muted mt-3" id="noChannelsMessage" style="display: none;">No channels
+                        configured for this entity.</p>
+
+                    <div id="listenersChannelCardsView">
+                        <h6 class="text-center mb-3">Select a channel to configure:</h6>
+                        <div id="listenersChannelCards" class="row row-cols-1 row-cols-md-3 g-4">
+                        </div>
+                    </div>
+
+                    <div id="channelConfigView" style="display: none;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="backToChannelCards">
+                            <i class="bi bi-arrow-left"></i> Back to Channels
+                        </button>
+                        <h6 class="mb-3">Configure <span id="configChannelNameInModal"></span></h6>
+                        <form id="channelConfigFormInModal">
+                            <input type="hidden" id="hiddenConfigEntityNameInModal">
+                            <input type="hidden" id="hiddenConfigChannelNameInModal">
+                            <div class="mb-3">
+                                <label for="schedulePickerInModal" class="form-label">Schedule</label>
+                                <input type="text" id="schedulePickerInModal" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="keywordsTextareaInModal" class="form-label">Keywords</label>
+                                <textarea id="keywordsTextareaInModal" class="form-control" rows="5"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer" style="justify-content: flex-start; height: 60px">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        id="listenersModalCloseButton" style="position: absolute; right: 0px">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveChannelConfigButtonInModal"
+                        style="display: none; position: absolute; right: 80px;">
+                        Save Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#previewModal"
+        id="previewButton" style="display: none;"></button>
+
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>
+                        Preview
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: scroll;height: 457px;">
+                    <div id="spreadsheet"></div>
+                </div>
+                <div class="modal-footer" style="justify-content: flex-start; height: 60px">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        style="position: absolute; right: 0px">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#metricsModal"
+        id="metricsButton" style="display: none;"></button>
+
+    <div class="modal fade" id="metricsModal" tabindex="-1" aria-labelledby="metricsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="metricsModalLabel">
+                        Metrics for <span id="metricsEntityName"></span> (<span id="metricsDomainName"></span>)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body metrics-modal-body">
+                    <div class="metrics-left-pane">
+                        <h6>Available Fields</h6>
+                        <div id="metricsTreeView">
+                        </div>
+                        <p class="text-center text-muted" id="metricsLoading" style="display: none;">Loading fields...
+                        </p>
+                        <p class="text-center text-danger" id="metricsError" style="display: none;">Error loading
+                            fields.</p>
+                    </div>
+                    <div class="metrics-right-pane">
+                        <p class="text-center text-muted" id="metricsRightPaneInitialMessage">Select a field from the
+                            left to view its metrics.</p>
+
+                        <div id="fieldDetailsContainer" style="display: none;">
+                            <h6>Target Field: <span id="targetFieldName"></span></h6>
+                            <div class="mb-3">
+                                <label for="sourceColumnDropdown" class="form-label">Source Column</label>
+                                <input type="text" id="sourceColumnDropdown" />
+                            </div>
+
+                            <h6 class="mt-4">Conversion Type</h6>
+                            <div class="conversion-option">
+                                <h6><input type="radio" name="conversionType" value="Direct Map" id="radioDirectMap">
+                                    Direct Map</h6>
+                                <small class="text-muted">Directly map the source column to the target field.</small>
+                            </div>
+                            <div class="conversion-option">
+                                <h6><input type="radio" name="conversionType" value="Prompt" id="radioPrompt"> Prompt
+                                </h6>
+                                <small class="text-muted">Use a custom prompt for data transformation.</small>
+                            </div>
+                            <div class="conversion-option">
+                                <h6><input type="radio" name="conversionType" value="Banding" id="radioBanding"> Banding
+                                </h6>
+                                <small class="text-muted">Define a range (min/max) for numerical data
+                                    conversion.</small>
+                            </div>
+
+                            <div id="promptInputArea" style="display: none;">
+                                <label for="promptTextarea" class="form-label">Enter Prompt</label>
+                                <textarea id="promptTextarea" class="form-control" rows="4"></textarea>
+                            </div>
+
+                            <div id="bandingInputArea" style="display: none;">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="minValueInput" class="form-label">Min Value</label>
+                                        <input type="number" id="minValueInput" class="form-control" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="maxValueInput" class="form-label">Max Value</label>
+                                        <input type="number" id="maxValueInput" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Process Field</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dashboardModal"
+        id="dashboardButton" style="display: none;"></button>
+
+    <div class="modal fade" id="dashboardModal" tabindex="-1" aria-labelledby="dashboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="dashboardHeader">
+                        Dashboard
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: scroll;height: 457px;">
+                    <div id="defaultLayout"></div>
+                </div>
+                <div class="modal-footer" style="justify-content: flex-start; height: 60px">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        style="position: absolute; right: 0px">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createEntityModal" tabindex="-1" aria-labelledby="createEntityModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createEntityModalLabel">Create New Entity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createEntityForm">
+                        <div class="mb-3">
+                            <label for="entityName" class="form-label">Entity Name</label>
+                            <input type="text" class="form-control" id="entityName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="purpose" class="form-label">Purpose</label>
+                            <textarea class="form-control" id="purpose" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="domainDropdown" class="form-label">Domain</label>
+                            <input type="text" id="domainDropdown" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Channels</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="channelTwitter" value="Twitter">
+                                <label class="form-check-label" for="channelTwitter">Twitter</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="channelYoutube" value="Youtube">
+                                <label class="form-check-label" for="channelYoutube">Youtube</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="channelInstagram" value="Instagram">
+                                <label class="form-check-label" for="channelInstagram">Instagram</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveEntityButton">Create Entity</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul id="breadcrumb"></ul>
+
+    <div class="top-right-button-container">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEntityModal">
+            Create New Entity
+        </button>
+    </div>
+
+    <div class="container" id="container">
+        <div id="Grid">
+            <h4>Please wait... fetching Details</h4>
+        </div>
+    </div>
+
+    <script id="domainTemplate" type="text/x-template">
+        <div class="domain-template">
+            <img class="domain-photo" src="${PhotoUrl}" alt="${Domain} Photo" />
+            <div style="display:flex;flex-direction:column">
+                <div class="domain-title">${EntityName}</div>
+                <div class="domain-text my-2">${Domain}</div>
+            </div>
+            
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        ej.base.enableRipple(true);
+        var panelData = [];
+        // Breadcrumb items definition
+        var items = [
+            { iconCss: 'e-icons e-home', url: "/" },
+            { id: 'breadcrumb_spectra', text: "ChurnPredict", url: "/MasterHeader#DomainListeners" }
+        ];
+        new ej.navigations.Breadcrumb({ items: items, enableNavigation: true }, '#breadcrumb');
+
+        // Global variables for Grid and Dropdown
+        var grid;
+        var domainDropdown;
+        var schedulePickerInModal; // Global for Syncfusion DateTimePicker within the main modal
+        var metricsTreeView;
+        var sourceColumnDropdownInstance; // Global for Syncfusion DropDownList (Source Column)
+        // var conversionDropdownInstance; // Global for Syncfusion DropDownList (Conversion)
+        const charts = ["Bar", "Column"];
+
+
+        // Helper function to get channel icon details
+        function getChannelDetails(channelName) {
+            const details = {
+                'Facebook': { iconClass: 'static/icons/facebook.png' },
+                'LinkedIn': { iconClass: 'static/icons/linkedin.jpg' },
+                'Instagram': { iconClass: 'static/icons/instagram.png' },
+                'Youtube': { iconClass: 'static/icons/youtube.png' },
+                'Google Forms': { iconClass: 'static/icons/googleforms.png' },
+                'Twitter': { iconClass: 'static/icons/xtwitter.jpg' },
+                'Google Reviews': { iconClass: 'static/icons/greview.png' }
+            };
+            return details[channelName] || details['Default'];
+        }
+
+        // Function to fetch entities (from collections) and render the grid
+        function fetchAndRenderGrid() {
+            // $('#Grid').html("<h4>Loading entities...</h4>"); // Show loading message
+            fetch('/get_all_entities')
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Failed to fetch collections.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    $('#Grid').html("");
+                    if (data.entities && data.entities.length > 0) {
+                        // Transform collection names into entitiesList format
+                        // IMPORTANT: For the 'Listeners' modal to fetch by EntityName,
+                        // this 'Domain' field in the grid needs to represent the EntityName.
+
+                        const entitiesList = data.entities.map(entity => ({
+                            "EntityName": entity.EntityName,
+                            "Domain": entity.Domain,
+                            "Purpose": entity.Purpose,
+                            "Channels": entity.Channels,
+                            "PhotoUrl": `https://placehold.co/60x60/3498db/white?text=${entity.EntityName.charAt(0).toUpperCase()}`
+                        }));
+                        // Destroy existing grid if it exists to prevent re-initialization errors
+                        if (grid) {
+                            grid.destroy();
+                            $('#Grid').html(""); // Clear the grid element
+                        }
+
+                        // Initialize Syncfusion Grid with the fetched entitiesList
+                        ej.grids.Grid.Inject(ej.grids.Edit);
+                        grid = new ej.grids.Grid({
+                            dataSource: entitiesList,
+                            allowFiltering: true,
+                            filterSettings: { type: 'Menu' },
+                            allowPaging: true,
+                            allowSorting: true,
+                            allowTextWrap: false,
+                            height: 400,
+                            rowHeight: 40,
+                            commandClick: commandClick,
+                            columns: [
+                                // Display EntityName, but use 'Domain' field name for consistency with template
+                                { field: 'EntityName', headerText: 'Entity Name', width: 250, template: '#domainTemplate' },
+                                {
+                                    headerText: 'Actions', width: 100, commands: [
+                                        { type: "Listeners", buttonOption: { iconCss: "e-search e-large e-icons", cssClass: 'e-flat' } },
+                                        { type: "DataPreview", buttonOption: { iconCss: "e-eye e-large e-icons", cssClass: 'e-flat' } },
+                                        { type: "Metrics", buttonOption: { iconCss: "e-chart-insert-column e-large e-icons", cssClass: 'e-flat' } },
+                                        { type: "Dashboard", buttonOption: { iconCss: "e-chart-insert-pie e-large e-icons", cssClass: 'e-flat' } }
+                                    ]
+                                }
+                            ],
+                        });
+                        grid.appendTo('#Grid');
+
+                        // Update Syncfusion Dropdown List for Domain with the fetched collections
+                        // Use EntityName for the dropdown data source
+                        var entityNamesForDropdown = ["Automobiles", "Banking", "Clinical", "Gaming", "Insurance", "Mobiles", "Restaurant", "Retail", "Telecom", "Transport"]
+                        if (domainDropdown) {
+                            domainDropdown.dataSource = entityNamesForDropdown;
+                            domainDropdown.dataBind();
+                        } else {
+                            domainDropdown = new ej.dropdowns.DropDownList({
+                                dataSource: entityNamesForDropdown,
+                                placeholder: 'Select a Domain',
+                                popupHeight: '200px'
+                            });
+                            domainDropdown.appendTo('#domainDropdown');
+                        }
+
+                    }
+                    else {
+                        $('#Grid').html("<h4>No entities found in the database.</h4>");
+                        if (domainDropdown) {
+                            domainDropdown.dataSource = [];
+                            domainDropdown.dataBind();
+                            domainDropdown.placeholder = 'No Domains Available';
+                        } else {
+                            domainDropdown = new ej.dropdowns.DropDownList({
+                                dataSource: [],
+                                placeholder: 'No Domains Available',
+                                popupHeight: '200px'
+                            });
+                            domainDropdown.appendTo('#domainDropdown');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching collections:', error);
+                    $('#Grid').html(`<h4>Error loading entities: ${error.message}. Please ensure the Flask backend is running.</h4>`);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Backend Error!',
+                        text: `Could not fetch collections: ${error.message}. Is your Flask backend running on ?`,
+                    });
+                    if (domainDropdown) {
+                        domainDropdown.dataSource = [];
+                        domainDropdown.dataBind();
+                        domainDropdown.placeholder = 'Error Loading Domains';
+                    } else {
+                        domainDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: [],
+                            placeholder: 'Error Loading Domains',
+                            popupHeight: '200px'
+                        });
+                        domainDropdown.appendTo('#domainDropdown');
+                    }
+                });
+        }
+
+        // Function to show the channel configuration view within the listeners modal
+        function showChannelConfigView(entityName, channelName, schedule, keywords) {
+            // Hide channel cards view and show config view
+            $('#listenersChannelCardsView').hide();
+            $('#channelConfigView').show();
+            // Show Save button, hide original Close button
+            $('#saveChannelConfigButtonInModal').show();
+            // $('#listenersModalCloseButton').hide(); // Decided to keep Close button always visible
+
+            // Populate modal title
+            $('#configChannelNameInModal').text(channelName);
+            // The main modal title already has entity name, no need for another span here
+            // $('#configEntityNameInModal').text(entityName); // This was removed in HTML as well
+
+            // Set hidden fields for saving
+            $('#hiddenConfigEntityNameInModal').val(entityName);
+            $('#hiddenConfigChannelNameInModal').val(channelName);
+            $('#schedulePickerInModal').html("");
+
+            if (schedulePickerInModal) {
+                schedulePickerInModal.destroy();
+                schedulePickerInModal = null;
+            }
+
+            // Initialize or update Syncfusion DateTimePicker
+            schedulePickerInModal = new ej.calendars.DateTimePicker({
+                placeholder: 'Select a schedule date and time',
+                format: 'yyyy-MM-dd HH:mm',
+                enableMask: true
+            });
+            schedulePickerInModal.appendTo('#schedulePickerInModal');
+
+
+            // Set initial values
+            if (schedule === 'Config pending' || !schedule) {
+                schedulePickerInModal.value = null; // Clear if not configured
+                schedulePickerInModal.placeholder = 'Select a schedule date and time'; // Reset placeholder
+            } else {
+                try {
+                    let parsedDate = new Date(schedule);
+                    if (!isNaN(parsedDate.getTime())) {
+                        schedulePickerInModal.value = parsedDate;
+                    } else {
+                        schedulePickerInModal.value = null;
+                        schedulePickerInModal.placeholder = schedule; // Use existing text as placeholder if not a date
+                    }
+                } catch (e) {
+                    schedulePickerInModal.value = null;
+                    schedulePickerInModal.placeholder = schedule;
+                }
+            }
+            $('#keywordsTextareaInModal').val(keywords === 'N/A' ? '' : keywords);
+        }
+
+        // Function to switch back to channel cards view
+        function showChannelCardsView() {
+            $('#channelConfigView').hide();
+            $('#listenersChannelCardsView').show();
+            $('#saveChannelConfigButtonInModal').hide();
+            // $('#listenersModalCloseButton').show(); // Decided to keep Close button always visible
+        }
+
+        // Function to render the metrics TreeView
+        function renderMetricsTreeView(entityName, domainName) {
+            const metricsTreeViewContainer = document.getElementById("metricsTreeView");
+            const metricsLoading = document.getElementById("metricsLoading");
+            const metricsError = document.getElementById("metricsError");
+
+            metricsTreeViewContainer.innerHTML = ''; // Clear previous treeview
+            metricsLoading.style.display = 'block'; // Show loading
+            metricsError.style.display = 'none'; // Hide error
+
+            fetch('/get_domain_fields_mapping')
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Failed to fetch domain fields mapping.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    metricsLoading.style.display = 'none'; // Hide loading
+                    const domainFields = data.domain_fields;
+
+                    const selectedDomainData = domainFields.find(d => d.Domain === domainName);
+
+                    let treeViewData = [];
+                    if (selectedDomainData && selectedDomainData.Fields && selectedDomainData.Fields.length > 0) {
+                        const childNodes = selectedDomainData.Fields.map((field, index) => ({
+                            id: `${entityName}_${field.replace(/\s+/g, '')}_${index}`, // Unique ID for field
+                            text: field
+                        }));
+
+                        treeViewData = [
+                            {
+                                id: entityName.replace(/\s+/g, ''), // Unique ID for parent
+                                text: entityName,
+                                hasChildren: true,
+                                expanded: true,
+                                children: childNodes
+                            }
+                        ];
+                    } else {
+                        metricsTreeViewContainer.innerHTML = `<p class="text-center text-muted">No fields found for domain: ${domainName}.</p>`;
+                    }
+
+                    if (metricsTreeView) {
+                        metricsTreeView.destroy(); // Destroy existing instance before re-creating
+                    }
+
+                    // Initialize the Syncfusion TreeView
+                    metricsTreeView = new ej.navigations.TreeView({
+                        fields: { dataSource: treeViewData, id: 'id', text: 'text', child: 'children' },
+                        // Optional: event handlers like nodeSelected for clicking on fields
+                        nodeSelected: function (args) {
+                            if (!args.nodeData.hasChildren) { // Only for leaf nodes (fields)
+                                const selectedField = args.nodeData.text;
+                                const currentEntityName = $('#metricsEntityName').text(); // Get current entity name from modal title
+
+                                // Clear and show loading in right pane
+                                $('#metricsRightPaneInitialMessage').hide();
+                                $('#fieldDetailsContainer').hide(); // Hide the container initially
+                                $('#metricsChartArea').html('<p class="text-center mt-4">Loading source columns...</p>');
+
+                                renderSourceColumnAndConversionOptions(currentEntityName, selectedField);
+                            } else {
+                                // If a parent node is selected, reset right pane
+                                $('#metricsRightPaneInitialMessage').show();
+                                $('#fieldDetailsContainer').hide();
+                                $('#metricsChartArea').html('<p class="text-center text-muted">Select a field from the left to view its metrics.</p>');
+                            }
+                        }
+                    });
+                    metricsTreeView.appendTo('#metricsTreeView');
+
+                })
+                .catch(error => {
+                    console.error('Error fetching domain fields:', error);
+                    metricsLoading.style.display = 'none';
+                    metricsError.style.display = 'block';
+                    metricsTreeViewContainer.innerHTML = `<p class="text-center text-danger">Failed to load fields: ${error.message}</p>`;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Data Load Error!',
+                        text: `Could not fetch domain fields: ${error.message}.`,
+                    });
+                });
+        }
+
+        function renderSourceColumnAndConversionOptions(entityName, targetField) {
+            const feedbackCollectionName = `${entityName} Feedback`; // Construct collection name
+
+            // Show the field details container
+            $('#metricsChartArea').html($('#fieldDetailsContainer').html()); // Copy the hidden template
+            $('#fieldDetailsContainer').show(); // Make it visible
+            $('#targetFieldName').text(targetField); // Update the target field name
+
+            // Destroy existing Syncfusion components if they exist
+            if (sourceColumnDropdownInstance) {
+                sourceColumnDropdownInstance.destroy();
+                sourceColumnDropdownInstance = null;
+            }
+
+            // Hide conditional areas initially
+            $('#promptInputArea').hide();
+            $('#bandingInputArea').hide();
+
+            // Deselect any previously selected radio button
+            $('input[name="conversionType"]').prop('checked', false);
+
+            // Set default values for min/max and prompt
+            $('#minValueInput').val(1);
+            $('#maxValueInput').val(10);
+            $('#promptTextarea').val("Given the text feedback, get the score for the field in range of $$min and $$max");
+
+
+            // Fetch source columns
+            fetch(`/get_collection_columns/${feedbackCollectionName}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || `Failed to fetch columns from ${feedbackCollectionName}.`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const sourceColumns = data.columns || [];
+
+                    // Initialize Source Column Dropdown
+                    sourceColumnDropdownInstance = new ej.dropdowns.DropDownList({
+                        dataSource: sourceColumns,
+                        placeholder: sourceColumns.length > 0 ? 'Select a Source Column' : 'No columns found',
+                        noRecordsTemplate: "No columns found for this entity's Feedback collection.",
+                        popupHeight: '200px'
+                    });
+                    sourceColumnDropdownInstance.appendTo('#sourceColumnDropdown');
+
+                    // Attach change event listener to the radio buttons
+                    $('input[name="conversionType"]').off('change').on('change', function () { // Use .off('change') to prevent multiple bindings
+                        const selectedValue = $(this).val();
+                        $('#promptInputArea').hide(); // Hide both
+                        $('#bandingInputArea').hide(); // Hide both
+
+                        if (selectedValue === "Prompt") {
+                            $('#promptInputArea').show();
+                            $('#bandingInputArea').show(); // Show min/max for Prompt
+                        } else if (selectedValue === "Banding") {
+                            $('#bandingInputArea').show(); // Show min/max for Banding
+                        }
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error fetching source columns:', error);
+                    $('#metricsChartArea').html(`<p class="text-center text-danger mt-4">Error loading source columns: ${error.message}</p>`);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Data Load Error!',
+                        text: `Could not fetch source columns for ${feedbackCollectionName}: ${error.message}.`,
+                    });
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchAndRenderGrid();
+
+            // Event listener for the "Back to Channels" button
+            $('#backToChannelCards').on('click', showChannelCardsView);
+        });
+
+        $("#saveEntityButton").on("click", function () {
+            const entityName = $("#entityName").val();
+            const purpose = $("#purpose").val();
+            const selectedDomain = domainDropdown.value; // Get value from the initialized dropdown
+            const selectedChannels = [];
+            $('input[type="checkbox"]:checked').each(function () {
+                selectedChannels.push($(this).val());
+            });
+
+            if (!entityName || !purpose || !selectedDomain || selectedChannels.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please fill in all fields and select at least one channel!',
+                });
+                return;
+            }
+
+            const newEntity = {
+                EntityName: entityName,
+                Purpose: purpose,
+                Domain: selectedDomain,
+                Channels: selectedChannels
+            };
+
+            fetch('/save_entity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEntity),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Failed to save entity on server.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Success:", data);
+                    Swal.fire(
+                        'Success!',
+                        'New entity created successfully! ID: ' + data.entity_id,
+                        'success'
+                    ).then(() => {
+                        $('#createEntityModal').modal('hide');
+                        $('#createEntityForm')[0].reset();
+                        domainDropdown.value = null;
+                        $('input[type="checkbox"]').prop('checked', false);
+                        fetchAndRenderGrid(); // Re-fetch and render the grid to show new entity
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Could not connect to the server or save entity.',
+                    });
+                });
+        });
+
+        // Save Channel Configuration Button Click (within the listeners modal)
+        $("#saveChannelConfigButtonInModal").on("click", function () {
+            const entityName = $('#hiddenConfigEntityNameInModal').val();
+            const channelName = $('#hiddenConfigChannelNameInModal').val();
+            const newSchedule = schedulePickerInModal.value ? schedulePickerInModal.value.toISOString() : null;
+            const newKeywords = $('#keywordsTextareaInModal').val();
+
+            if (!newSchedule && !newKeywords) {
+                Swal.fire('Warning', 'Please provide a schedule or keywords to save.', 'warning');
+                return;
+            }
+
+            const configData = {
+                EntityName: entityName,
+                ChannelName: channelName,
+                Schedule: newSchedule,
+                Keywords: newKeywords
+            };
+
+            fetch('/update_channel_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(configData),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || 'Failed to update channel configuration.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    Swal.fire('Success!', data.message, 'success')
+                        .then(() => {
+                            showChannelCardsView();
+                        })
+                })
+                .catch(error => {
+                    console.error('Error updating channel config:', error);
+                    Swal.fire('Error!', error.message || 'Could not save configuration.', 'error');
+                });
+        });
+
+        // --- Command Click Handler for Grid Actions ---
+        function commandClick(args) {
+            if (args.commandColumn.type == "Listeners") {
+                let selectedEntityName = args.rowData.EntityName;
+                const listenersChannelCardsDiv = document.getElementById("listenersChannelCards");
+                const listenersModalLabelSpan = document.getElementById("listenerEntityName");
+                const listenersLoading = document.getElementById("listenersLoading");
+                const noChannelsMessage = document.getElementById("noChannelsMessage");
+
+                // Reset modal state
+                listenersChannelCardsDiv.innerHTML = ''; // Clear previous content
+                noChannelsMessage.style.display = 'none'; // Hide no channels message
+                listenersLoading.style.display = 'block'; // Show loading message
+                $('#listenersChannelCardsView').show(); // Ensure cards view is visible
+                $('#channelConfigView').hide(); // Ensure config view is hidden
+                $('#saveChannelConfigButtonInModal').hide(); // Hide Save button
+
+                listenersModalLabelSpan.textContent = selectedEntityName;
+
+                // Open listeners modal immediately for loading state
+                document.getElementById("listenersButton").click();
+
+                // Fetch entity details from Flask backend using EntityName
+                fetch(`/get_entity_by_name/${selectedEntityName}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw new Error(errData.message || `Failed to fetch details for ${selectedEntityName}.`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(entityData => {
+                        listenersLoading.style.display = 'none'; // Hide loading message
+
+                        if (entityData.Channels && entityData.Channels.length > 0) {
+                            entityData.Channels.forEach(channel => {
+                                const channelDetails = getChannelDetails(channel);
+                                let keywordsSummary = "";
+                                let schedule = "";
+                                // keywordsSummary = channel.keywords.length > 50 ? channel.keywords.substring(0, 50) + '...' : channel.keywords;
+                                // const channelCardHtml = `
+                                //     <div class="col">
+                                //         <div class="channel-card"
+                                //             data-entity-name="${selectedEntityName}"
+                                //             data-channel-name="${channel.name}"
+                                //             data-schedule="${channel.schedule}"
+                                //             data-keywords="${channel.keywords}">
+                                //             <i class="bi ${channelDetails.iconClass} listener-channel-icon"></i>
+                                //             <div class="channel-card-title">${channel.name}</div>
+                                //             <small class="text-muted">Schedule: ${channel.schedule}</small><br/>
+                                //             <small class="text-muted">Keywords: ${keywordsSummary}</small>
+                                //         </div>
+                                //     </div>
+                                // `;
+                                const channelCardHtml = `
+                                    <div class="col">
+                                        <div class="channel-card"
+                                            data-entity-name="${selectedEntityName}"
+                                            data-channel-name="${channel}"
+                                            data-schedule="${schedule}"
+                                            data-keywords="${keywordsSummary}">
+                                            <img src="${channelDetails.iconClass}" class="listener-channel-icon" />
+                                            <div class="channel-card-title">${channel}</div>
+                                            <small class="text-muted">Schedule: ${schedule}</small><br/>
+                                            <small class="text-muted">Keywords: ${keywordsSummary}</small>
+                                        </div>
+                                    </div>
+                                `;
+                                listenersChannelCardsDiv.insertAdjacentHTML('beforeend', channelCardHtml);
+                            });
+
+                            // Add click event listeners to each channel card
+                            listenersChannelCardsDiv.querySelectorAll('.channel-card').forEach(card => {
+                                card.addEventListener('click', function () {
+                                    const entityName = this.dataset.entityName;
+                                    const channelName = this.dataset.channelName;
+                                    const schedule = this.dataset.schedule;
+                                    const keywords = this.dataset.keywords;
+                                    showChannelConfigView(entityName, channelName, schedule, keywords);
+                                });
+                            });
+
+                        } else {
+                            noChannelsMessage.style.display = 'block'; // Show no channels message
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching entity for listeners:', error);
+                        listenersLoading.style.display = 'none';
+                        listenersChannelCardsDiv.innerHTML = `<p class="text-center text-danger">Error loading listener details: ${error.message}</p>`;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: `Could not load listener details: ${error.message}.`,
+                        });
+                    });
+            }
+            else if (args.commandColumn.type == "DataPreview") {
+                $("#spreadsheet").html("");
+                let selectedEntityName = args.rowData.EntityName;
+                if (args.rowData.Domain == "Clinical") {
+                    selectedEntityName = selectedEntityName + " Feedback"
+                }
+                else {
+                    selectedEntityName = selectedEntityName + " Feedback"
+                }
+                fetch(`/get_collection_by_name/${selectedEntityName}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw new Error(errData.message || `Failed to fetch data for ${selectedEntityName}.`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        var sheet = [{
+                            ranges: [{ dataSource: data.data }]
+                        }];
+
+                        var spreadsheet = new ej.spreadsheet.Spreadsheet({
+                            sheets: sheet
+                        });
+                        spreadsheet.appendTo('#spreadsheet');
+                    });
+
+                document.getElementById("previewButton").click();
+            }
+            else if (args.commandColumn.type == "Metrics") {
+                const selectedEntityName = args.rowData.EntityName;
+                const selectedDomainName = args.rowData.Domain; // Get domain name
+
+                $('#metricsEntityName').text(selectedEntityName);
+                $('#metricsDomainName').text(selectedDomainName);
+                $('#metricsChartArea').html('<p class="text-center text-muted">Select a field from the left to view its metrics.</p>'); // Clear/reset right pane
+
+                document.getElementById("metricsButton").click(); // Open the metrics modal
+                renderMetricsTreeView(selectedEntityName, selectedDomainName);
+            }
+            else if (args.commandColumn.type == "Dashboard") {
+                let selectedEntityName = args.rowData.EntityName;
+                if (args.rowData.Domain == "Clinical") {
+                    selectedEntityName = selectedEntityName + " Scored"
+                }
+                else {
+                    selectedEntityName = selectedEntityName + " Feedback"
+                }
+                $("#dashboardHeader").html(selectedEntityName + " Dashboard")
+                fetch(`/get_distinct_counts_for_charts_dynamic/${selectedEntityName}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw new Error(errData.message || `Failed to fetch data for ${selectedEntityName}.`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(d => {
+                        console.log(d);
+                        data = d.data;
+                        panelData = [];
+                        let churnData = data.filter(x => x.fieldName == 'Churn')[0].chartdata;
+                        let rownum = 1;
+                        let colnum = 1;
+                        let fieldCount = 1;
+                        panelData.push({
+                            'sizeX': 1, 'sizeY': 2, 'row': rownum, 'col': colnum,
+                            header: '<div>' + 'Churn' + '</div>', content: '<div class="chartbox" id="' + 'Churn' + '" style="height:100%; width:100%"></div>'
+                        });
+                        $.each(data, function (i, j) {
+                            if (j.fieldName !== 'Churn') {
+                                fieldCount += 1;
+                                if (fieldCount == 3) {
+                                    colnum = colnum;
+                                }
+                                else {
+                                    colnum += 1;
+                                }
+                                panelData.push({
+                                    'sizeX': 1, 'sizeY': 1, 'row': rownum, 'col': colnum,
+                                    header: '<div>' + j.fieldName + '</div>', content: '<div class="chartbox" id="' + j.fieldName + '" style="height:100%; width:100%"></div>'
+                                });
+                                if (fieldCount % 2 == 0 && fieldCount > 3) {
+                                    rownum = rownum + 1;
+                                    colnum = 0;
+                                }
+                            }
+
+                        });
+                        console.log(panelData);
+                        //dashboardGrid.Inject(Page);
+                        //ej.grids.dashboardGrid.Inject(ej.grids.Page);
+                        var dashboard = new ej.layouts.DashboardLayout({
+                            cellSpacing: [10, 10],
+                            cellAspectRatio: 200 / 85,
+                            columns: 2,
+                            panels: panelData
+                        });
+                        dashboard.appendTo('#defaultLayout');
+                        $.each(data, function (i, j) {
+                            if (j.fieldName != "") {
+                                if (j.fieldName == "Churn") {
+                                    renderDonutPieChart("Churn", churnData, "label", "count");
+                                }
+                                else if (j.chartdata.length <= 3) {
+                                    renderSimplePieChart(j.fieldName, j.chartdata.sort((a, b) => a.label.localeCompare(b.label)), "label", "count", j.divisor);
+                                }
+                                else {
+                                    let random = Math.floor(Math.random() * charts.length);
+                                    if (charts[random] == "Bar") renderBarChart(j.fieldName, j.chartdata.sort((a, b) => a.label.localeCompare(b.label)), "label", "count", j.divisor);
+                                    else if (charts[random] == "Column") renderColumnChart(j.fieldName, j.chartdata.sort((a, b) => a.label.localeCompare(b.label)), "label", "count", j.divisor);
+
+                                }
+                            }
+
+                        })
+
+                    })
+                document.getElementById("dashboardButton").click();
+            }
+        }
+
+        // --- CSV to JSON Conversion for Data Preview ---
+        function csvToJson(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(header => header.trim());
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const obj = {};
+                let values = [];
+                let inQuotes = false;
+                let currentValue = '';
+
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim()); // Push the last value
+
+                if (values.length === headers.length) {
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j]] = values[j];
+                    }
+                    result.push(obj);
+                }
+            }
+            return result;
+        }
+        function renderBarChart(element, chartdata, xcolumn, ycolumn, divisor) {
+            am5.ready(function () {
+                // Create root5 element
+                var root5 = am5.Root.new(element);
+
+
+                // Set themes
+                // https://www.amcharts.com/docs/v5/concepts/themes/
+                root5.setThemes([am5themes_Animated.new(root5)]);
+
+
+
+                // Create chart
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/
+                var chart = root5.container.children.push(
+                    am5xy.XYChart.new(root5, {
+                        panX: false,
+                        panY: false,
+                        wheelX: "none",
+                        wheelY: "none"
+                    })
+                );
+
+
+                // Create axes
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+                var yRenderer = am5xy.AxisRendererY.new(root5, { minGridDistance: 30 });
+
+                var yAxis = chart.yAxes.push(
+                    am5xy.CategoryAxis.new(root5, {
+                        maxDeviation: 0,
+                        categoryField: xcolumn,
+                        renderer: yRenderer
+                    })
+                );
+
+                var xAxis = chart.xAxes.push(
+                    am5xy.ValueAxis.new(root5, {
+                        maxDeviation: 0,
+                        min: 0,
+                        renderer: am5xy.AxisRendererX.new(root5, {})
+                    })
+                );
+
+
+                // Create series
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+                var series = chart.series.push(
+                    am5xy.ColumnSeries.new(root5, {
+                        name: "Series 1",
+                        xAxis: xAxis,
+                        yAxis: yAxis,
+                        valueXField: ycolumn,
+                        sequencedInterpolation: true,
+                        categoryYField: xcolumn
+                    })
+                );
+
+                var columnTemplate = series.columns.template;
+
+                columnTemplate.setAll({
+                    draggable: true,
+                    cursorOverStyle: "pointer",
+                    tooltipText: "{" + ycolumn + "}",
+                    cornerRadiusBR: 10,
+                    cornerRadiusTR: 10
+                });
+                columnTemplate.adapters.add("fill", (fill, target) => {
+                    return chart.get("colors").getIndex(series.columns.indexOf(target));
+                });
+
+                columnTemplate.adapters.add("stroke", (stroke, target) => {
+                    return chart.get("colors").getIndex(series.columns.indexOf(target));
+                });
+
+                columnTemplate.events.on("dragstop", () => {
+                    sortCategoryAxis();
+                });
+
+                // Get series item by category
+                function getSeriesItem(category) {
+                    for (var i = 0; i < series.dataItems.length; i++) {
+                        var dataItem = series.dataItems[i];
+                        if (dataItem.get("categoryY") == category) {
+                            return dataItem;
+                        }
+                    }
+                }
+
+
+                // Axis sorting
+                function sortCategoryAxis() {
+                    // Sort by value
+                    series.dataItems.sort(function (x, y) {
+                        return y.get("graphics").y() - x.get("graphics").y();
+                    });
+
+                    var easing = am5.ease.out(am5.ease.cubic);
+
+                    // Go through each axis item
+                    am5.array.each(yAxis.dataItems, function (dataItem) {
+                        // get corresponding series item
+                        var seriesDataItem = getSeriesItem(dataItem.get("category"));
+
+                        if (seriesDataItem) {
+                            // get index of series data item
+                            var index = series.dataItems.indexOf(seriesDataItem);
+
+                            var column = seriesDataItem.get("graphics");
+
+                            // position after sorting
+                            var fy =
+                                yRenderer.positionToCoordinate(yAxis.indexToPosition(index)) -
+                                column.height() / 2;
+
+                            // set index to be the same as series data item index
+                            if (index != dataItem.get("index")) {
+                                dataItem.set("index", index);
+
+                                // current position
+                                var x = column.x();
+                                var y = column.y();
+
+                                column.set("dy", -(fy - y));
+                                column.set("dx", x);
+
+                                column.animate({ key: "dy", to: 0, duration: 600, easing: easing });
+                                column.animate({ key: "dx", to: 0, duration: 600, easing: easing });
+                            } else {
+                                column.animate({ key: "y", to: fy, duration: 600, easing: easing });
+                                column.animate({ key: "x", to: 0, duration: 600, easing: easing });
+                            }
+                        }
+                    });
+
+                    // Sort axis items by index.
+                    // This changes the order instantly, but as dx and dy is set and animated,
+                    // they keep in the same places and then animate to true positions.
+                    yAxis.dataItems.sort(function (x, y) {
+                        return x.get("index") - y.get("index");
+                    });
+                }
+
+
+                yAxis.data.setAll(chartdata);
+                series.data.setAll(chartdata);
+
+
+                // Make stuff animate on load
+                // https://www.amcharts.com/docs/v5/concepts/animations/
+                series.appear(1000);
+                chart.appear(1000, 100);
+                if (divisor != 1) {
+                    chart.children.unshift(am5.Label.new(root5, {
+                        text: "data is represented in " + divisor + "s",
+                        textAlign: "center",
+                        x: am5.percent(100),
+                        centerX: am5.percent(100),
+                        paddingTop: -10,
+                        paddingBottom: 0
+                    }));
+                }
+
+            }); // end am5.ready()
+
+        }
+        function renderDonutPieChart(element, chartdata, xcolumn, ycolumn) {
+            am5.ready(function () {
+
+                var root3 = am5.Root.new(element);
+
+
+                // Set themes
+                // https://www.amcharts.com/docs/v5/concepts/themes/
+                root3.setThemes([
+                    am5themes_Animated.new(root3)
+                ]);
+
+
+
+                // Create chart
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
+                var chart = root3.container.children.push(am5percent.PieChart.new(root3, {
+                    layout: root3.verticalLayout,
+                    innerRadius: am5.percent(50),
+                    //width:am5.percent(80)
+                }));
+
+
+                // Create series
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
+                var series = chart.series.push(am5percent.PieSeries.new(root3, {
+                    valueField: ycolumn,
+                    categoryField: xcolumn,
+                    alignLabels: false
+                }));
+
+                //series.labels.template.setAll({
+                //    textType: "circular",
+                //    centerX: 0,
+                //    centerY: 0
+                //});
+                series.labels.template.set("forceHidden", true);
+                series.ticks.template.set("visible", false);
+                series.slices.template.set("tooltipText", "{category}: [bold]{valuePercentTotal.formatNumber('0.00')}%[/] ({value})");
+                //series.labels.template.set("text", "{column}: [bold]{valuePercentTotal.formatNumber('0.00')}%[/] ({value})");
+
+                // Set data
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
+                series.data.setAll(chartdata);
+
+
+                //Create legend
+                //https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
+                var legend = chart.children.push(am5.Legend.new(root3, {
+                    centerX: am5.percent(50),
+                    x: am5.percent(50),
+                    marginTop: 15,
+                    marginBottom: 15,
+                }));
+
+                legend.data.setAll(series.dataItems);
+
+
+                // Play initial series animation
+                // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
+                series.appear(1000, 100);
+
+            });
+        }
+        function renderColumnChart(element, chartdata, xcolumn, ycolumn, divisor) {
+            am5.ready(function () {
+
+                // Create root element
+
+                var root1 = am5.Root.new(element);
+
+
+                // Set themes
+                // https://www.amcharts.com/docs/v5/concepts/themes/
+                root1.setThemes([
+                    am5themes_Animated.new(root1)
+                ]);
+                // Create chart
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/
+                var chart = root1.container.children.push(am5xy.XYChart.new(root1, {
+                    panX: true,
+                    panY: true,
+                    wheelX: "panX",
+                    wheelY: "zoomX"
+                }));
+
+                // Add cursor
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+                var cursor = chart.set("cursor", am5xy.XYCursor.new(root1, {}));
+                cursor.lineY.set("visible", false);
+
+
+                // Create axes
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+                var xRenderer = am5xy.AxisRendererX.new(root1, { minGridDistance: 30 });
+                //xRenderer.labels.template.setAll({
+                //    rotation: -90,
+                //    centerY: am5.p50,
+                //    centerX: am5.p100,
+                //    paddingRight: 15
+                //});
+
+                var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root1, {
+                    maxDeviation: 0.3,
+                    categoryField: xcolumn,
+                    renderer: xRenderer,
+                    tooltip: am5.Tooltip.new(root1, {})
+                }));
+                xRenderer.grid.template.set("visible", false);
+
+                var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root1, {
+                    maxDeviation: 0.3,
+                    renderer: am5xy.AxisRendererY.new(root1, {})
+                }));
+
+
+                // Create series
+                // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+                var series = chart.series.push(am5xy.ColumnSeries.new(root1, {
+                    name: "Series 1",
+                    xAxis: xAxis,
+                    yAxis: yAxis,
+                    valueYField: ycolumn,
+                    sequencedInterpolation: true,
+                    categoryXField: xcolumn,
+                    tooltip: am5.Tooltip.new(root1, {
+                        labelText: "{valueY}"
+                    })
+                }));
+
+                series.columns.template.setAll({ cornerRadiusTL: 5, cornerRadiusTR: 5 });
+                series.columns.template.adapters.add("fill", (fill, target) => {
+                    return chart.get("colors").getIndex(series.columns.indexOf(target));
+                });
+
+                series.columns.template.adapters.add("stroke", (stroke, target) => {
+                    return chart.get("colors").getIndex(series.columns.indexOf(target));
+                });
+
+
+                // Set data
+                var data = chartdata;
+                xAxis.data.setAll(data);
+                series.data.setAll(data);
+
+
+                // Make stuff animate on load
+                // https://www.amcharts.com/docs/v5/concepts/animations/
+                series.appear(1000);
+                chart.appear(1000, 100);
+                if (divisor != 1) {
+                    chart.children.unshift(am5.Label.new(root1, {
+                        text: "data is represented in " + divisor + "s",
+                        textAlign: "center",
+                        x: am5.percent(100),
+                        centerX: am5.percent(100),
+                        paddingTop: -10,
+                        paddingBottom: 0
+                    }));
+                }
+            });
+        }
+        function renderSimplePieChart(element, chartdata, xcolumn, ycolumn, divisor) {
+            am5.ready(function () {
+
+                var root2 = am5.Root.new(element);
+
+
+                // Set themes
+                // https://www.amcharts.com/docs/v5/concepts/themes/
+                root2.setThemes([
+                    am5themes_Animated.new(root2)
+                ]);
+
+
+                // Create chart
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
+                var chart = root2.container.children.push(am5percent.PieChart.new(root2, {
+                    layout: root2.verticalLayout
+                }));
+
+
+                // Create series
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
+                var series = chart.series.push(am5percent.PieSeries.new(root2, {
+                    valueField: ycolumn,
+                    categoryField: xcolumn
+                }));
+
+
+                // Set data
+                // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
+                series.data.setAll(chartdata);
+
+
+                // Play initial series animation
+                // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
+                series.appear(1000, 100);
+                if (divisor != 1) {
+                    chart.children.unshift(am5.Label.new(root2, {
+                        text: "data is represented in " + divisor + "s",
+                        textAlign: "center",
+                        x: am5.percent(100),
+                        centerX: am5.percent(100),
+                        paddingTop: 0,
+                        paddingBottom: 0
+                    }));
+                }
+            });
+        }
+
+    </script>
+
+</body>
+
+</html>
