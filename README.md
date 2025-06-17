@@ -41,7 +41,7 @@ Our core technology stack is robust and scalable, deployed entirely on **Google 
 
 Below is a high-level representation of ChurnPredict's architecture, illustrating the flow of data and interaction between its core components.
 
-<img src="https://storage.googleapis.com/sqlitedata/ChurnPredictArchitecture.png" alt="ChurnPredict Architecture" width="500">
+<img src="https://storage.googleapis.com/sqlitedata/ChurnPredictArchitecture.png" alt="ChurnPredict Architecture" width="1000">
 
 ---
 ## ⚠️ Challenges we ran into
